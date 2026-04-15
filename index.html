@@ -3,396 +3,370 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RPSLS — Rock Paper Scissors Lizard Spock</title>
+  <title>RPSLS — Ultimate Edition</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d0d14;
-      --surface: #13131e;
-      --surface2: #1a1a28;
-      --surface3: #222235;
-      --border: rgba(255,255,255,0.08);
-      --text: #e8e8f0;
-      --muted: #7a7a99;
-      --faint: #3a3a55;
-      --accent: #7c6af7;
-      --accent-glow: rgba(124,106,247,0.35);
-      --accent2: #f76a8a;
-      --win: #4ade80;
-      --lose: #f87171;
-      --draw: #fbbf24;
-      --win-bg: rgba(74,222,128,0.1);
-      --lose-bg: rgba(248,113,113,0.1);
-      --draw-bg: rgba(251,191,36,0.1);
-      --radius: 1rem;
-      --font: 'Satoshi', sans-serif;
-      --ease: cubic-bezier(0.34,1.56,0.64,1);
+      --bg:#0d0d14; --surface:#13131e; --surface2:#1a1a28; --surface3:#222235;
+      --border:rgba(255,255,255,0.08); --text:#e8e8f0; --muted:#7a7a99; --faint:#3a3a55;
+      --accent:#7c6af7; --accent-glow:rgba(124,106,247,0.35); --accent2:#f76a8a;
+      --win:#4ade80; --lose:#f87171; --draw:#fbbf24;
+      --win-bg:rgba(74,222,128,0.1); --lose-bg:rgba(248,113,113,0.1); --draw-bg:rgba(251,191,36,0.1);
+      --radius:1rem; --font:'Satoshi',sans-serif; --ease:cubic-bezier(0.34,1.56,0.64,1);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
-    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100dvh; overflow-x: hidden; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{-webkit-font-smoothing:antialiased;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(124,106,247,0.12) 0%,transparent 70%);}
+    button{cursor:pointer;background:none;border:none;font:inherit;color:inherit;}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
 
-    /* BG glow */
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(124,106,247,0.12) 0%, transparent 70%);
-    }
+    .app{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:1.5rem 1rem 4rem;}
 
-    .app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .header{text-align:center;margin-bottom:1.5rem;}
+    .title{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:900;letter-spacing:-.02em;margin-bottom:.25rem;}
+    .title em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .subtitle{font-size:.78rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
 
-    /* HEADER */
-    .header { text-align: center; margin-bottom: 2rem; }
-    .logo-row { display: flex; align-items: center; justify-content: center; gap: .6rem; margin-bottom: .5rem; }
-    .logo-icon { width: 36px; height: 36px; }
-    .title { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 900; letter-spacing: -.02em; }
-    .title em { font-style: normal; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .subtitle { font-size: .85rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+    .mode-bar{display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.25rem;}
+    .mode-btn{padding:.45rem 1.1rem;border-radius:50rem;font-size:.82rem;font-weight:700;
+      color:var(--muted);border:1.5px solid var(--border);transition:all .2s var(--ease);}
+    .mode-btn.active{background:var(--accent);color:white;border-color:var(--accent);
+      box-shadow:0 0 20px var(--accent-glow);}
+    .mode-btn:hover:not(.active){color:var(--text);border-color:var(--accent);}
 
-    /* SCORE */
-    .scoreboard {
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .5rem;
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1rem 1.5rem; margin-bottom: 1.5rem;
-    }
-    .score-side { text-align: center; }
-    .score-who { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .25rem; }
-    .score-num { font-size: 2.2rem; font-weight: 900; line-height: 1; }
-    .score-num.you { color: var(--accent); }
-    .score-num.ai  { color: var(--accent2); }
-    .score-vs { font-size: .85rem; font-weight: 700; color: var(--faint); }
+    .scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem;
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:.85rem 1.5rem;margin-bottom:1.25rem;}
+    .score-side{text-align:center;}
+    .score-who{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.2rem;}
+    .score-num{font-size:2.4rem;font-weight:900;line-height:1;}
+    .score-num.you{color:var(--accent);}
+    .score-num.ai{color:var(--accent2);}
+    .score-vs{font-size:.85rem;font-weight:700;color:var(--faint);}
 
-    /* ARENA */
-    .arena {
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1.5rem 1rem; margin-bottom: 1.5rem; min-height: 140px;
-    }
-    .arena-slot { text-align: center; }
-    .arena-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .5rem; }
-    .arena-choice {
-      font-size: 3.5rem; line-height: 1;
-      display: flex; align-items: center; justify-content: center;
-      width: 80px; height: 80px; margin: 0 auto;
-      border-radius: 50%;
-      background: var(--surface2);
-      border: 2px solid var(--border);
-      transition: all .3s var(--ease);
-    }
-    .arena-choice.you-choice { border-color: var(--accent); box-shadow: 0 0 24px var(--accent-glow); }
-    .arena-choice.ai-choice  { border-color: var(--accent2); box-shadow: 0 0 24px rgba(247,106,138,0.3); }
+    .arena{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.75rem;
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:1.25rem 1rem;margin-bottom:1.25rem;min-height:120px;}
+    .arena-slot{text-align:center;}
+    .arena-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.4rem;}
+    .arena-choice{font-size:3rem;line-height:1;display:flex;align-items:center;justify-content:center;
+      width:72px;height:72px;margin:0 auto;border-radius:50%;background:var(--surface2);
+      border:2px solid var(--border);transition:all .3s var(--ease);}
+    .arena-choice.you-side{border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow);}
+    .arena-choice.ai-side{border-color:var(--accent2);box-shadow:0 0 20px rgba(247,106,138,0.3);}
+    .vs-badge{font-size:.85rem;font-weight:900;color:var(--faint);letter-spacing:.1em;}
 
-    @keyframes pop { 0%{transform:scale(0.3) rotate(-20deg);opacity:0} 70%{transform:scale(1.15) rotate(3deg)} 100%{transform:scale(1) rotate(0deg);opacity:1} }
-    @keyframes shake { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
-    .pop { animation: pop .45s var(--ease) forwards; }
-    .shake { animation: shake .12s linear 4; }
+    @keyframes pop{0%{transform:scale(0.3) rotate(-20deg);opacity:0}70%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+    @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+    .pop{animation:pop .45s var(--ease) forwards;}
+    .shake{animation:shake .12s linear 4;}
 
-    .vs-badge { font-size: .9rem; font-weight: 900; color: var(--faint); letter-spacing: .1em; }
+    .result-banner{text-align:center;padding:.65rem 1rem;border-radius:.75rem;margin-bottom:1.25rem;
+      font-weight:700;font-size:1rem;opacity:0;transform:translateY(6px);transition:all .3s ease;}
+    .result-banner.show{opacity:1;transform:translateY(0);}
+    .result-banner.win{background:var(--win-bg);color:var(--win);border:1px solid rgba(74,222,128,.25);}
+    .result-banner.lose{background:var(--lose-bg);color:var(--lose);border:1px solid rgba(248,113,113,.25);}
+    .result-banner.draw{background:var(--draw-bg);color:var(--draw);border:1px solid rgba(251,191,36,.25);}
 
-    /* RESULT BANNER */
-    .result-banner {
-      text-align: center; padding: .75rem 1rem;
-      border-radius: .75rem; margin-bottom: 1.5rem;
-      font-weight: 700; font-size: 1.05rem;
-      opacity: 0; transform: translateY(6px);
-      transition: all .3s ease;
-    }
-    .result-banner.show { opacity: 1; transform: translateY(0); }
-    .result-banner.win  { background: var(--win-bg);  color: var(--win);  border: 1px solid rgba(74,222,128,.25); }
-    .result-banner.lose { background: var(--lose-bg); color: var(--lose); border: 1px solid rgba(248,113,113,.25); }
-    .result-banner.draw { background: var(--draw-bg); color: var(--draw); border: 1px solid rgba(251,191,36,.25); }
+    .choices-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;margin-bottom:.6rem;}
+    .choices{display:grid;gap:.5rem;margin-bottom:1.25rem;}
+    .choices.mode-5{grid-template-columns:repeat(5,1fr);}
+    .choices.mode-15{grid-template-columns:repeat(5,1fr);}
 
-    /* CHOICES */
-    .choices-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); text-align: center; margin-bottom: .75rem; }
-    .choices {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: .6rem; margin-bottom: 1.5rem;
-    }
-    @media (max-width: 480px) { .choices { grid-template-columns: repeat(5, 1fr); gap: .4rem; } }
-    .choice-btn {
-      aspect-ratio: 1; border-radius: .75rem; border: 2px solid var(--border);
-      background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: .25rem; cursor: pointer; transition: all .18s var(--ease); position: relative; overflow: hidden;
-    }
-    .choice-btn::before { content: ''; position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity .18s; }
-    .choice-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 24px var(--accent-glow); }
-    .choice-btn:hover::before { opacity: .08; }
-    .choice-btn:active { transform: translateY(0) scale(.95); }
-    .choice-btn.selected { border-color: var(--accent); background: rgba(124,106,247,.12); box-shadow: 0 0 20px var(--accent-glow); }
-    .choice-btn.disabled { pointer-events: none; opacity: .4; }
-    .choice-emoji { font-size: clamp(1.4rem, 4vw, 2rem); line-height: 1; position: relative; z-index: 1; }
-    .choice-name { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); position: relative; z-index: 1; }
-    @media (max-width: 380px) { .choice-name { display: none; } }
+    .choice-btn{aspect-ratio:1;border-radius:.75rem;border:2px solid var(--border);
+      background:var(--surface);display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:.2rem;cursor:pointer;transition:all .18s var(--ease);position:relative;overflow:hidden;}
+    .choice-btn::before{content:'';position:absolute;inset:0;background:var(--accent);opacity:0;transition:opacity .18s;}
+    .choice-btn:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 24px var(--accent-glow);}
+    .choice-btn:hover::before{opacity:.08;}
+    .choice-btn:active{transform:translateY(0) scale(.95);}
+    .choice-btn.selected{border-color:var(--accent);background:rgba(124,106,247,.12);box-shadow:0 0 20px var(--accent-glow);}
+    .choice-btn.disabled{pointer-events:none;opacity:.4;}
+    .choice-emoji{font-size:clamp(1.1rem,3vw,1.6rem);line-height:1;position:relative;z-index:1;}
+    .choice-name{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);position:relative;z-index:1;text-align:center;line-height:1.2;}
 
-    /* RULES */
-    .rules-toggle { display: flex; align-items: center; justify-content: center; gap: .4rem; width: 100%; padding: .6rem; background: var(--surface); border: 1px solid var(--border); border-radius: .75rem; color: var(--muted); font-size: .8rem; font-weight: 600; cursor: pointer; margin-bottom: .75rem; transition: all .18s; }
-    .rules-toggle:hover { color: var(--text); border-color: var(--accent); }
-    .rules-toggle svg { transition: transform .25s; }
-    .rules-toggle.open svg { transform: rotate(180deg); }
-    .rules-box {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1rem; margin-bottom: 1.5rem; display: none;
-    }
-    .rules-box.open { display: block; }
-    .rules-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .75rem; }
-    .rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; }
-    @media (max-width: 420px) { .rules-grid { grid-template-columns: 1fr; } }
-    .rule-item { font-size: .78rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; }
-    .rule-item strong { color: var(--text); }
+    .rules-toggle{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;
+      padding:.55rem;background:var(--surface);border:1px solid var(--border);border-radius:.75rem;
+      color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;margin-bottom:.6rem;transition:all .18s;}
+    .rules-toggle:hover{color:var(--text);border-color:var(--accent);}
+    .rules-toggle svg{transition:transform .25s;}
+    .rules-toggle.open svg:last-child{transform:rotate(180deg);}
+    .rules-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:1rem;margin-bottom:1.25rem;display:none;}
+    .rules-box.open{display:block;}
+    .rules-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.6rem;}
+    .rules-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.3rem;}
+    @media(max-width:420px){.rules-grid{grid-template-columns:1fr;}}
+    .rule-item{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;}
+    .rule-item::before{content:'→';color:var(--accent);font-weight:700;flex-shrink:0;}
 
-    /* HISTORY */
-    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
-    .history-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-    .clear-btn { font-size: .72rem; color: var(--muted); padding: .25rem .6rem; border-radius: .4rem; border: 1px solid var(--border); background: none; cursor: pointer; transition: all .18s; }
-    .clear-btn:hover { color: var(--lose); border-color: var(--lose); }
-    .history-list { display: flex; flex-direction: column; gap: .4rem; max-height: 260px; overflow-y: auto; }
-    .history-list::-webkit-scrollbar { width: 4px; }
-    .history-list::-webkit-scrollbar-track { background: var(--surface); }
-    .history-list::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
-    .history-item {
-      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .75rem;
-      padding: .5rem .75rem; border-radius: .6rem;
-      background: var(--surface); border: 1px solid var(--border);
-      font-size: .82rem; animation: slideIn .25s var(--ease);
-    }
-    @keyframes slideIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:none; } }
-    .history-item.win  { border-color: rgba(74,222,128,.2);  }
-    .history-item.lose { border-color: rgba(248,113,113,.2); }
-    .history-item.draw { border-color: rgba(251,191,36,.2);  }
-    .h-round { font-size: .68rem; color: var(--muted); font-weight: 700; }
-    .h-moves { display: flex; align-items: center; gap: .4rem; color: var(--text); font-weight: 500; }
-    .h-moves span { font-size: .95rem; }
-    .h-desc { font-size: .72rem; color: var(--muted); }
-    .h-badge { font-size: .68rem; font-weight: 800; padding: .2rem .5rem; border-radius: .4rem; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-    .h-badge.win  { background: var(--win-bg);  color: var(--win); }
-    .h-badge.lose { background: var(--lose-bg); color: var(--lose); }
-    .h-badge.draw { background: var(--draw-bg); color: var(--draw); }
+    .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+    .history-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+    .clear-btn{font-size:.7rem;color:var(--muted);padding:.2rem .55rem;border-radius:.4rem;border:1px solid var(--border);transition:all .18s;}
+    .clear-btn:hover{color:var(--lose);border-color:var(--lose);}
+    .history-list{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow-y:auto;}
+    .history-list::-webkit-scrollbar{width:4px;}
+    .history-list::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px;}
 
-    .empty-history { text-align: center; padding: 2rem; color: var(--faint); font-size: .85rem; }
+    .history-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.6rem;
+      padding:.45rem .65rem;border-radius:.6rem;background:var(--surface);border:1px solid var(--border);
+      font-size:.8rem;animation:slideIn .25s var(--ease);}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+    .history-item.win{border-color:rgba(74,222,128,.2);}
+    .history-item.lose{border-color:rgba(248,113,113,.2);}
+    .history-item.draw{border-color:rgba(251,191,36,.2);}
+    .h-round{font-size:.65rem;color:var(--muted);font-weight:700;white-space:nowrap;}
+    .h-moves{display:flex;align-items:center;gap:.35rem;}
+    .h-desc{font-size:.7rem;color:var(--muted);}
+    .h-badge{font-size:.65rem;font-weight:800;padding:.18rem .45rem;border-radius:.35rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+    .h-badge.win{background:var(--win-bg);color:var(--win);}
+    .h-badge.lose{background:var(--lose-bg);color:var(--lose);}
+    .h-badge.draw{background:var(--draw-bg);color:var(--draw);}
+    .empty-history{text-align:center;padding:1.5rem;color:var(--faint);font-size:.82rem;}
 
-    /* CONFETTI */
-    .confetti-piece {
-      position: fixed; width: 10px; height: 10px; top: -10px; border-radius: 2px;
-      animation: fall linear forwards; pointer-events: none; z-index: 999;
-    }
-    @keyframes fall {
-      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
+    @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+    .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;border-radius:2px;animation:fall linear forwards;pointer-events:none;z-index:999;}
+
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.5rem 1.1rem;border-radius:50rem;font-size:.8rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:999;opacity:0;pointer-events:none;transition:opacity .22s;}
+    .toast.show{opacity:1;}
   </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- HEADER -->
   <header class="header">
-    <div class="logo-row">
-      <svg class="logo-icon" viewBox="0 0 36 36" fill="none">
-        <circle cx="18" cy="18" r="17" stroke="url(#lg)" stroke-width="2"/>
-        <text x="18" y="24" text-anchor="middle" font-size="16">🖖</text>
-        <defs><linearGradient id="lg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop stop-color="#7c6af7"/><stop offset="1" stop-color="#f76a8a"/></linearGradient></defs>
-      </svg>
-      <h1 class="title"><em>RPSLS</em></h1>
-    </div>
-    <p class="subtitle">Rock · Paper · Scissors · Lizard · Spock</p>
+    <h1 class="title">🖖 <em>Ultimate RPSLS</em></h1>
+    <p class="subtitle" id="mode-subtitle">Modo: Clássico — 5 elementos</p>
   </header>
 
-  <!-- SCORE -->
+  <div class="mode-bar">
+    <button class="mode-btn active" id="btn-mode-5" onclick="setGameMode(5)">⚡ Clássico (5)</button>
+    <button class="mode-btn" id="btn-mode-15" onclick="setGameMode(15)">🌀 Avançado (15)</button>
+  </div>
+
   <div class="scoreboard">
-    <div class="score-side">
-      <div class="score-who">Você</div>
-      <div class="score-num you" id="score-you">0</div>
-    </div>
+    <div class="score-side"><div class="score-who">Você</div><div class="score-num you" id="score-you">0</div></div>
     <div class="score-vs">VS</div>
-    <div class="score-side">
-      <div class="score-who">IA</div>
-      <div class="score-num ai" id="score-ai">0</div>
-    </div>
+    <div class="score-side"><div class="score-who">IA</div><div class="score-num ai" id="score-ai">0</div></div>
   </div>
 
-  <!-- ARENA -->
   <div class="arena">
-    <div class="arena-slot">
-      <div class="arena-label">Você</div>
-      <div class="arena-choice" id="arena-you">❓</div>
-    </div>
+    <div class="arena-slot"><div class="arena-label">Você</div><div class="arena-choice" id="arena-you">❓</div></div>
     <div class="vs-badge">VS</div>
-    <div class="arena-slot">
-      <div class="arena-label">IA</div>
-      <div class="arena-choice" id="arena-ai">❓</div>
-    </div>
+    <div class="arena-slot"><div class="arena-label">IA</div><div class="arena-choice" id="arena-ai">❓</div></div>
   </div>
 
-  <!-- RESULT -->
   <div class="result-banner" id="result-banner">Escolha uma opção!</div>
 
-  <!-- CHOICES -->
   <p class="choices-label">Sua jogada</p>
-  <div class="choices" id="choices"></div>
+  <div class="choices mode-5" id="choices-grid"></div>
 
-  <!-- RULES -->
   <button class="rules-toggle" id="rules-toggle" onclick="toggleRules()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
     Ver regras do jogo
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
   </button>
   <div class="rules-box" id="rules-box">
-    <p class="rules-title">Quem vence quem</p>
+    <p class="rules-title" id="rules-title">Relações</p>
     <div class="rules-grid" id="rules-grid"></div>
   </div>
 
-  <!-- HISTORY -->
   <div>
     <div class="history-header">
-      <span class="history-title">Histórico de partidas</span>
-      <button class="clear-btn" onclick="clearHistory()">Limpar</button>
+      <span class="history-title">Histórico</span>
+      <button class="clear-btn" onclick="clearAll()">Limpar tudo</button>
     </div>
     <div class="history-list" id="history-list">
       <div class="empty-history">Nenhuma partida ainda.<br>Faça sua primeira jogada! 👆</div>
     </div>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-const CHOICES = [
-  { id: 'rock',     emoji: '🪨', name: 'Pedra' },
-  { id: 'paper',   emoji: '📄', name: 'Papel' },
-  { id: 'scissors',emoji: '✂️', name: 'Tesoura' },
-  { id: 'lizard',  emoji: '🦎', name: 'Lagarto' },
-  { id: 'spock',   emoji: '🖖', name: 'Spock' },
+const CLASSIC = [
+  {id:'rock',     emoji:'🪨', name:'Pedra'},
+  {id:'paper',    emoji:'📄', name:'Papel'},
+  {id:'scissors', emoji:'✂️', name:'Tesoura'},
+  {id:'lizard',   emoji:'🦎', name:'Lagarto'},
+  {id:'spock',    emoji:'🖖', name:'Spock'},
 ];
-
-// result[a][b] = { win: bool, desc: string }
-const RULES = {
-  scissors: { paper:   { win:true,  desc:'Tesoura corta Papel' },
-               lizard:  { win:true,  desc:'Tesoura decapita Lagarto' },
-               rock:    { win:false, desc:'Pedra esmaga Tesoura' },
-               spock:   { win:false, desc:'Spock esmaga Tesoura' },
-               scissors:{ win:null,  desc:'Empate' } },
-  paper:    { rock:    { win:true,  desc:'Papel cobre Pedra' },
-               spock:   { win:true,  desc:'Papel refuta Spock' },
-               scissors:{ win:false, desc:'Tesoura corta Papel' },
-               lizard:  { win:false, desc:'Lagarto come Papel' },
-               paper:   { win:null,  desc:'Empate' } },
-  rock:     { scissors:{ win:true,  desc:'Pedra esmaga Tesoura' },
-               lizard:  { win:true,  desc:'Pedra esmaga Lagarto' },
-               paper:   { win:false, desc:'Papel cobre Pedra' },
-               spock:   { win:false, desc:'Spock vaporiza Pedra' },
-               rock:    { win:null,  desc:'Empate' } },
-  lizard:   { paper:   { win:true,  desc:'Lagarto come Papel' },
-               spock:   { win:true,  desc:'Lagarto envenena Spock' },
-               rock:    { win:false, desc:'Pedra esmaga Lagarto' },
-               scissors:{ win:false, desc:'Tesoura decapita Lagarto' },
-               lizard:  { win:null,  desc:'Empate' } },
-  spock:    { rock:    { win:true,  desc:'Spock vaporiza Pedra' },
-               scissors:{ win:true,  desc:'Spock esmaga Tesoura' },
-               paper:   { win:false, desc:'Papel refuta Spock' },
-               lizard:  { win:false, desc:'Lagarto envenena Spock' },
-               spock:   { win:null,  desc:'Empate' } },
+const CLASSIC_RULES = {
+  scissors:{paper:'Tesoura corta Papel',lizard:'Tesoura decapita Lagarto'},
+  paper:{rock:'Papel cobre Pedra',spock:'Papel refuta Spock'},
+  rock:{scissors:'Pedra esmaga Tesoura',lizard:'Pedra esmaga Lagarto'},
+  lizard:{paper:'Lagarto come Papel',spock:'Lagarto envenena Spock'},
+  spock:{rock:'Spock vaporiza Pedra',scissors:'Spock esmaga Tesoura'},
 };
 
-const ALL_RULES_LIST = [
-  'Tesoura corta Papel','Papel cobre Pedra','Pedra esmaga Lagarto',
-  'Lagarto envenena Spock','Spock esmaga Tesoura','Tesoura decapita Lagarto',
-  'Lagarto come Papel','Papel refuta Spock','Spock vaporiza Pedra','Pedra esmaga Tesoura'
+const ADVANCED = [
+  {id:'rock',      emoji:'🪨', name:'Pedra'},
+  {id:'gun',       emoji:'🔫', name:'Arma'},
+  {id:'lightning', emoji:'⚡', name:'Raio'},
+  {id:'devil',     emoji:'😈', name:'Diabo'},
+  {id:'dragon',    emoji:'🐉', name:'Dragão'},
+  {id:'water',     emoji:'💧', name:'Água'},
+  {id:'air',       emoji:'🌬️', name:'Ar'},
+  {id:'paper',     emoji:'📄', name:'Papel'},
+  {id:'sponge',    emoji:'🧽', name:'Esponja'},
+  {id:'wolf',      emoji:'🐺', name:'Lobo'},
+  {id:'tree',      emoji:'🌳', name:'Árvore'},
+  {id:'human',     emoji:'🧑', name:'Humano'},
+  {id:'snake',     emoji:'🐍', name:'Cobra'},
+  {id:'scissors',  emoji:'✂️', name:'Tesoura'},
+  {id:'fire',      emoji:'🔥', name:'Fogo'},
 ];
 
+const WIN_ADV = {
+  rock:    {sponge:'Pedra esmaga Esponja',wolf:'Pedra acerta Lobo',tree:'Pedra destrói Árvore',human:'Pedra esmaga Humano',snake:'Pedra esmaga Cobra',scissors:'Pedra quebra Tesoura',fire:'Pedra abafa Fogo'},
+  gun:     {wolf:'Arma atira no Lobo',tree:'Arma corta Árvore',human:'Arma ameaça Humano',snake:'Arma mata Cobra',scissors:'Arma supera Tesoura',fire:'Arma dispara pelo Fogo',rock:'Arma perfura Pedra'},
+  lightning:{tree:'Raio queima Árvore',human:'Raio fulmina Humano',snake:'Raio mata Cobra',scissors:'Raio funde Tesoura',fire:'Raio supera Fogo',rock:'Raio fragmenta Pedra',gun:'Raio derrete Arma'},
+  devil:   {human:'Diabo corrompe Humano',snake:'Diabo controla Cobra',scissors:'Diabo dobra Tesoura',fire:'Diabo comanda o Fogo',rock:'Diabo transforma Pedra',gun:'Diabo amaldiçoa Arma',lightning:'Diabo absorve Raio'},
+  dragon:  {snake:'Dragão devora Cobra',scissors:'Dragão funde Tesoura',fire:'Dragão controla o Fogo',rock:'Dragão derrete Pedra',gun:'Dragão destrói Arma',lightning:'Dragão absorve Raio',devil:'Dragão derrota Diabo'},
+  water:   {scissors:'Água enferruja Tesoura',fire:'Água apaga Fogo',rock:'Água erode Pedra',gun:'Água enferruja Arma',lightning:'Água conduz Raio',devil:'Água purifica Diabo',dragon:'Água extingue Dragão'},
+  air:     {fire:'Ar apaga Fogo',rock:'Ar erode Pedra',gun:'Ar dispersa Arma',lightning:'Ar dispersa Raio',devil:'Ar dissolve Diabo',dragon:'Ar dispersa Dragão',water:'Ar evapora Água'},
+  paper:   {rock:'Papel cobre Pedra',gun:'Papel envolve Arma',lightning:'Papel isola Raio',devil:'Papel sela Diabo',dragon:'Papel aprisiona Dragão',water:'Papel absorve Água',air:'Papel navega no Ar'},
+  sponge:  {gun:'Esponja absorve bala',lightning:'Esponja isola Raio',devil:'Esponja absorve Diabo',dragon:'Esponja absorve Dragão',water:'Esponja absorve Água',air:'Esponja absorve Ar',paper:'Esponja molha Papel'},
+  wolf:    {lightning:'Lobo ruge para o Raio',devil:'Lobo devora Diabo',dragon:'Lobo ataca Dragão',water:'Lobo atravessa Água',air:'Lobo corre mais que o Ar',paper:'Lobo rasga Papel',sponge:'Lobo rasga Esponja'},
+  tree:    {devil:'Árvore prende Diabo',dragon:'Árvore resiste ao Dragão',water:'Árvore absorve Água',air:'Árvore resiste ao Vento',paper:'Árvore gera Papel',sponge:'Árvore supera Esponja',wolf:'Árvore protege do Lobo'},
+  human:   {dragon:'Humano mata Dragão',water:'Humano bebe Água',air:'Humano respira Ar',paper:'Humano escreve em Papel',sponge:'Humano usa Esponja',wolf:'Humano domestica Lobo',tree:'Humano corta Árvore'},
+  snake:   {water:'Cobra nada na Água',air:'Cobra desliza pelo Ar',paper:'Cobra rasga Papel',sponge:'Cobra rasga Esponja',wolf:'Cobra morde Lobo',tree:'Cobra enrola Árvore',human:'Cobra envenena Humano'},
+  scissors:{air:'Tesoura corta o Ar',paper:'Tesoura corta Papel',sponge:'Tesoura corta Esponja',wolf:'Tesoura apara Lobo',tree:'Tesoura poda Árvore',human:'Tesoura corta Humano',snake:'Tesoura decapita Cobra'},
+  fire:    {paper:'Fogo queima Papel',sponge:'Fogo queima Esponja',wolf:'Fogo queima Lobo',tree:'Fogo queima Árvore',human:'Fogo queima Humano',snake:'Fogo queima Cobra',scissors:'Fogo derrete Tesoura'},
+};
+
+let gameMode = 5;
 let scoreYou = 0, scoreAI = 0, round = 0;
 let history = [];
 let locked = false;
 
-function getEmoji(id) { return CHOICES.find(c=>c.id===id).emoji; }
-function getName(id)  { return CHOICES.find(c=>c.id===id).name; }
+function currentChoices(){ return gameMode === 5 ? CLASSIC : ADVANCED; }
 
-// Build choice buttons
-(function buildChoices(){
-  const container = document.getElementById('choices');
-  CHOICES.forEach(c => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn'; btn.id = 'btn-'+c.id;
-    btn.setAttribute('aria-label', c.name);
-    btn.innerHTML = `<span class="choice-emoji">${c.emoji}</span><span class="choice-name">${c.name}</span>`;
-    btn.onclick = () => play(c.id);
-    container.appendChild(btn);
-  });
-})();
-
-// Build rules list
-(function buildRules(){
-  const grid = document.getElementById('rules-grid');
-  ALL_RULES_LIST.forEach(r => {
-    const d = document.createElement('div'); d.className = 'rule-item';
-    d.innerHTML = `<span style="color:var(--accent)">→</span> <span>${r}</span>`;
-    grid.appendChild(d);
-  });
-})();
-
-function toggleRules(){
-  const btn = document.getElementById('rules-toggle');
-  const box = document.getElementById('rules-box');
-  btn.classList.toggle('open'); box.classList.toggle('open');
+function setGameMode(mode) {
+  if (gameMode === mode) return;
+  gameMode = mode;
+  document.getElementById('btn-mode-5').classList.toggle('active', mode===5);
+  document.getElementById('btn-mode-15').classList.toggle('active', mode===15);
+  document.getElementById('mode-subtitle').textContent =
+    mode===5 ? 'Modo: Clássico — 5 elementos' : 'Modo: Avançado — 15 elementos';
+  const grid = document.getElementById('choices-grid');
+  grid.className = 'choices ' + (mode===5 ? 'mode-5' : 'mode-15');
+  buildChoices();
+  buildRules();
+  resetArena();
 }
+
+function buildChoices() {
+  const grid = document.getElementById('choices-grid');
+  grid.innerHTML = currentChoices().map(c => `
+    <button class="choice-btn" id="btn-${c.id}" onclick="play('${c.id}')" aria-label="${c.name}">
+      <span class="choice-emoji">${c.emoji}</span>
+      <span class="choice-name">${c.name}</span>
+    </button>`).join('');
+}
+
+function buildRules() {
+  const grid = document.getElementById('rules-grid');
+  const title = document.getElementById('rules-title');
+  if (gameMode === 5) {
+    title.textContent = 'Quem vence quem (Clássico)';
+    const msgs = [];
+    Object.entries(CLASSIC_RULES).forEach(([w, loses]) =>
+      Object.values(loses).forEach(d => msgs.push(d)));
+    grid.innerHTML = msgs.map(d => `<div class="rule-item">${d}</div>`).join('');
+  } else {
+    title.textContent = 'Cada elemento vence 7 outros (regra circular)';
+    const choices = ADVANCED;
+    const items = [];
+    choices.forEach((c) => {
+      const wins = Object.keys(WIN_ADV[c.id]);
+      items.push(`<div class="rule-item"><strong style="color:var(--text)">${c.emoji} ${c.name}</strong> vence ${wins.map(w=>{const f=choices.find(x=>x.id===w);return f?f.emoji+' '+f.name:w}).join(', ')}</div>`);
+    });
+    grid.innerHTML = items.join('');
+  }
+}
+
+function getResult(youId, aiId) {
+  if (youId === aiId) return {outcome:'draw', desc:'Empate!'};
+  if (gameMode === 5) {
+    const wins = CLASSIC_RULES[youId];
+    if (wins && wins[aiId]) return {outcome:'win', desc: wins[aiId]};
+    const aiWins = CLASSIC_RULES[aiId];
+    if (aiWins && aiWins[youId]) return {outcome:'lose', desc: aiWins[youId]};
+    return {outcome:'draw', desc:'Empate!'};
+  } else {
+    const choices = ADVANCED;
+    const youIdx = choices.findIndex(c=>c.id===youId);
+    const aiIdx  = choices.findIndex(c=>c.id===aiId);
+    const diff = (youIdx - aiIdx + 15) % 15;
+    if (diff >= 1 && diff <= 7) {
+      return {outcome:'win', desc: WIN_ADV[youId]?.[aiId] || `${getName(youId)} vence ${getName(aiId)}`};
+    } else {
+      return {outcome:'lose', desc: WIN_ADV[aiId]?.[youId] || `${getName(aiId)} vence ${getName(youId)}`};
+    }
+  }
+}
+
+function getEmoji(id){ return currentChoices().find(c=>c.id===id)?.emoji || '❓'; }
+function getName(id){ return currentChoices().find(c=>c.id===id)?.name || id; }
 
 function play(youId) {
   if (locked) return;
   locked = true;
   round++;
 
-  // Highlight selected
-  CHOICES.forEach(c => document.getElementById('btn-'+c.id).classList.add('disabled'));
+  const choices = currentChoices();
+  choices.forEach(c => document.getElementById('btn-'+c.id).classList.add('disabled'));
   document.getElementById('btn-'+youId).classList.add('selected');
 
-  // AI random
-  const aiId = CHOICES[Math.floor(Math.random()*5)].id;
-
-  // Animate arena — thinking dots first
+  const aiId = choices[Math.floor(Math.random()*choices.length)].id;
   const arenaYou = document.getElementById('arena-you');
   const arenaAI  = document.getElementById('arena-ai');
   arenaYou.textContent = '⏳'; arenaAI.textContent = '⏳';
-  arenaYou.className = 'arena-choice shake'; arenaAI.className = 'arena-choice shake';
+  arenaYou.className = 'arena-choice shake';
+  arenaAI.className  = 'arena-choice shake';
 
   setTimeout(() => {
     arenaYou.textContent = getEmoji(youId);
-    arenaYou.className = 'arena-choice you-choice pop';
-    arenaAI.textContent = getEmoji(aiId);
-    arenaAI.className = 'arena-choice ai-choice pop';
+    arenaYou.className   = 'arena-choice you-side pop';
+    arenaAI.textContent  = getEmoji(aiId);
+    arenaAI.className    = 'arena-choice ai-side pop';
 
-    const result = RULES[youId][aiId];
+    const {outcome, desc} = getResult(youId, aiId);
     const banner = document.getElementById('result-banner');
-    banner.className = 'result-banner';
-    void banner.offsetWidth;
+    banner.className = 'result-banner'; void banner.offsetWidth;
 
-    let outcome, label, msg;
-    if (result.win === null) {
-      outcome = 'draw'; label = '🤝 Empate!'; msg = result.desc;
-    } else if (result.win) {
-      outcome = 'win'; label = '🎉 Você venceu!'; msg = result.desc;
-      scoreYou++;
-      setTimeout(confetti, 200);
-    } else {
-      outcome = 'lose'; label = '😬 IA venceu!'; msg = result.desc;
-      scoreAI++;
-    }
+    let label;
+    if (outcome==='draw') { label='🤝 Empate!'; }
+    else if (outcome==='win') { label='🎉 Você venceu!'; scoreYou++; setTimeout(confetti,200); }
+    else { label='😬 IA venceu!'; scoreAI++; }
 
     document.getElementById('score-you').textContent = scoreYou;
     document.getElementById('score-ai').textContent  = scoreAI;
+    banner.textContent = `${label} — ${desc}`;
+    banner.className   = `result-banner ${outcome} show`;
 
-    banner.textContent = `${label} — ${msg}`;
-    banner.className = `result-banner ${outcome} show`;
+    history.unshift({round, youId, aiId, outcome, desc});
+    renderHistory();
 
-    addHistory(round, youId, aiId, outcome, msg);
-
-    // Unlock after delay
     setTimeout(() => {
-      CHOICES.forEach(c => {
+      choices.forEach(c => {
         const b = document.getElementById('btn-'+c.id);
-        b.classList.remove('disabled','selected');
+        if(b){b.classList.remove('disabled','selected');}
       });
       locked = false;
     }, 900);
   }, 550);
 }
 
-function addHistory(r, youId, aiId, outcome, desc) {
-  history.unshift({ r, youId, aiId, outcome, desc });
-  renderHistory();
+function resetArena() {
+  ['arena-you','arena-ai'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '❓'; el.className = 'arena-choice';
+  });
+  const banner = document.getElementById('result-banner');
+  banner.className = 'result-banner'; banner.textContent = 'Escolha uma opção!';
 }
 
 function renderHistory() {
@@ -401,52 +375,57 @@ function renderHistory() {
     list.innerHTML = '<div class="empty-history">Nenhuma partida ainda.<br>Faça sua primeira jogada! 👆</div>';
     return;
   }
-  list.innerHTML = history.map(h => `
-    <div class="history-item ${h.outcome}">
-      <span class="h-round">#${h.r}</span>
+  list.innerHTML = history.map(h => {
+    const getE = id => [...CLASSIC,...ADVANCED].find(c=>c.id===id)?.emoji||'❓';
+    const getN = id => [...CLASSIC,...ADVANCED].find(c=>c.id===id)?.name||id;
+    return `<div class="history-item ${h.outcome}">
+      <span class="h-round">#${h.round}</span>
       <div>
         <div class="h-moves">
-          <span>${getEmoji(h.youId)}</span>
-          <span style="color:var(--faint);font-size:.7rem">vs</span>
-          <span>${getEmoji(h.aiId)}</span>
-          <span style="font-size:.72rem;color:var(--muted)">${getName(h.youId)} × ${getName(h.aiId)}</span>
+          <span>${getE(h.youId)}</span>
+          <span style="color:var(--faint);font-size:.65rem">vs</span>
+          <span>${getE(h.aiId)}</span>
+          <span style="font-size:.68rem;color:var(--muted)">${getN(h.youId)} × ${getN(h.aiId)}</span>
         </div>
         <div class="h-desc">${h.desc}</div>
       </div>
       <span class="h-badge ${h.outcome}">${h.outcome==='win'?'Ganhou':h.outcome==='lose'?'Perdeu':'Empate'}</span>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-function clearHistory() {
-  history = []; scoreYou = 0; scoreAI = 0; round = 0;
-  document.getElementById('score-you').textContent = '0';
-  document.getElementById('score-ai').textContent  = '0';
-  document.getElementById('arena-you').textContent = '❓';
-  document.getElementById('arena-you').className   = 'arena-choice';
-  document.getElementById('arena-ai').textContent  = '❓';
-  document.getElementById('arena-ai').className    = 'arena-choice';
-  const banner = document.getElementById('result-banner');
-  banner.className = 'result-banner'; banner.textContent = 'Escolha uma opção!';
+function clearAll() {
+  scoreYou=0; scoreAI=0; round=0; history=[];
+  document.getElementById('score-you').textContent='0';
+  document.getElementById('score-ai').textContent='0';
+  resetArena();
   renderHistory();
 }
 
+function toggleRules() {
+  document.getElementById('rules-toggle').classList.toggle('open');
+  document.getElementById('rules-box').classList.toggle('open');
+}
+
 function confetti() {
-  const colors = ['#7c6af7','#f76a8a','#4ade80','#fbbf24','#60a5fa','#f472b6'];
-  for (let i = 0; i < 38; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetti-piece';
-    el.style.left = Math.random()*100+'vw';
-    el.style.background = colors[Math.floor(Math.random()*colors.length)];
-    el.style.width = (6+Math.random()*8)+'px';
-    el.style.height = (6+Math.random()*8)+'px';
-    el.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
-    el.style.animationDuration = (1.2+Math.random()*1.4)+'s';
-    el.style.animationDelay = (Math.random()*.5)+'s';
+  const colors=['#7c6af7','#f76a8a','#4ade80','#fbbf24','#60a5fa','#f472b6'];
+  for(let i=0;i<40;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.2+Math.random()*1.4}s;animation-delay:${Math.random()*.5}s;`;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 3000);
+    setTimeout(()=>el.remove(),3000);
   }
 }
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+buildChoices();
+buildRules();
 </script>
 </body>
 </html>
